@@ -1,8 +1,11 @@
-#pragma once
+#ifndef __FAST_LINE__
+#define __FAST_LINE__
 
-#include "GlobalPoint.h"
+
 #include <ctgmath>
 #include <tuple>
+
+#include "GlobalPoint.h"
 
 /**
    Calculate the Line parameters (n1, n2, c) of a Line in Rho*Phi-Z.
@@ -123,3 +126,4 @@ private:
     bool fittingValid_;
 };
 
+#endif

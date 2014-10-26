@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __FAST_CIRCLE__
+#define __FAST_CIRCLE__
 
 #include <tuple>
 #include <ctgmath>
@@ -39,7 +40,7 @@ fastRiemannCircleFit(GlobalPoint outer, GlobalPoint inner, GlobalPoint vertex, f
 std::tuple<double, double, double, double, double, double, bool>
 fastRiemannCircleFit(GlobalPoint outer, GlobalPoint inner, GlobalPoint vertex, float norm)
 {
-    GlobalPoint x, y, z;
+    //GlobalPoint x, y, z;
     GlobalPoint p;
 
     float R2, fact;
@@ -50,37 +51,48 @@ fastRiemannCircleFit(GlobalPoint outer, GlobalPoint inner, GlobalPoint vertex, f
 
     R2 = perp2(p);
     fact = 1.f / (1.f + R2);
+    GlobalPoint x(fact * p.x(), fact * p.y(), fact * R2);
+    /*
     x[0] = fact * p.x();
     x[1] = fact * p.y();
     x[2] = fact * R2;
+*/
 
     p[0] = inner.x() / norm;
     p[1] = inner.y() / norm;
     p[2] = inner.z() / norm;
+    
 
     R2 = perp2(p);
     fact = 1.f / (1.f + R2);
+    GlobalPoint y(fact * p.x(), fact * p.y(), fact * R2);
+    /*
     y[0] = fact * p.x();
     y[1] = fact * p.y();
     y[2] = fact * R2;
-
+    */
+    
     p[0] = vertex.x() / norm;
     p[1] = vertex.y() / norm;
     p[2] = vertex.z() / norm;
 
     R2 = perp2(p);
     fact = 1.f / (1.f + R2);
-
+    GlobalPoint z(fact * p.x(), fact * p.y(), fact * R2);
+    /*
     z[0] = fact * p.x();
     z[1] = fact * p.y();
     z[2] = fact * R2;
-
-    GlobalPoint n;
-
-    n[0] =   x[1] * (y[2] - z[2]) + y[1] * (z[2] - x[2]) + z[1] * (x[2] - y[2]);
-    n[1] = -(x[0] * (y[2] - z[2]) + y[0] * (z[2] - x[2]) + z[0] * (x[2] - y[2]));
-    n[2] =   x[0] * (y[1] - z[1]) + y[0] * (z[1] - x[1]) + z[0] * (x[1] - y[1]);
-
+    */
+    
+    //GlobalPoint n;
+    //n[0] =   x[1] * (y[2] - z[2]) + y[1] * (z[2] - x[2]) + z[1] * (x[2] - y[2]);
+    //n[1] = -(x[0] * (y[2] - z[2]) + y[0] * (z[2] - x[2]) + z[0] * (x[2] - y[2]));
+    //n[2] =   x[0] * (y[1] - z[1]) + y[0] * (z[1] - x[1]) + z[0] * (x[1] - y[1]);
+    GlobalPoint n(x[1] * (y[2] - z[2]) + y[1] * (z[2] - x[2]) + z[1] * (x[2] - y[2]),
+        -(x[0] * (y[2] - z[2]) + y[0] * (z[2] - x[2]) + z[0] * (x[2] - y[2])),
+        x[0] * (y[1] - z[1]) + y[0] * (z[1] - x[1]) + z[0] * (x[1] - y[1]));
+    
     double mag2 = length2(n);
 
     //one sqrt here
@@ -94,7 +106,7 @@ fastRiemannCircleFit(GlobalPoint outer, GlobalPoint inner, GlobalPoint vertex, f
     //another sqrt here
     double rho = sqrt((n[0] * n[0] + n[1] * n[1] - 4.*c * (c + n[2]))) / fabs(2.*(c + n[2]));
 
-    bool fittingValid = (mag2 < 1.e-20) * (fabs(c + n[2]) < 1.e-5);
+    bool fittingValid = (mag2 >= 1.e-20) * (fabs(c + n[2]) >= 1.e-5);
     double n1 = n[0];
     double n2 = n[1];
 
@@ -204,4 +216,6 @@ private:
 
     bool fittingValid_;
 };
+
+#endif 
 

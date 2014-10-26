@@ -1,19 +1,26 @@
+#ifndef __GLOBAL_POINT__
+#define __GLOBAL_POINT__
+
 #include <ctgmath>
 #include <cinttypes>
+#include <iostream>
+
 class GlobalPoint
 {
 public:
     GlobalPoint() :
         v {0, 0, 0}
-    {}
-
-    GlobalPoint(float x, float y, float z) :
-        v {x, y, z} {
-
+    {
     }
 
-    GlobalPoint(const GlobalPoint &o) :
-        v {o[0], o[1], o[2]} {
+    GlobalPoint(float x, float y, float z):
+        v{x, y, z}
+    {
+    }
+
+    GlobalPoint(const GlobalPoint &o):
+        v{o[0], o[1], o[2]}
+    {
     }
 
     float x() const
@@ -31,14 +38,14 @@ public:
         return v[2];
     }
 
-    float& operator[](uint8_t index)
+    float& operator[](const uint8_t index)
     {
         return v[index];
     }
 
-    float operator[](uint8_t index) const
+    const float& operator[](const uint8_t index) const
     {
-        return v[index];
+        return const_cast<GlobalPoint&>(*this)[index];
     }
 
     GlobalPoint operator-(const GlobalPoint &o) const
@@ -55,11 +62,16 @@ public:
     {
         return GlobalPoint(v[0] * scalar, v[1] * scalar, v[2] * scalar);
     }
-
+    
 private:
     float v[3];
 };
 
+std::ostream& operator<<(std::ostream& os, const GlobalPoint& obj)
+{
+    os << "(" << obj[0] <<"," << obj[1] <<"," << obj[2] <<")";
+    return os;
+}
 
 GlobalPoint normalize(const GlobalPoint &a);
 float dot(const GlobalPoint &a, const GlobalPoint &b);
@@ -101,3 +113,6 @@ inline float dot(const GlobalPoint &a, const GlobalPoint &b)
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 }
 
+
+
+#endif

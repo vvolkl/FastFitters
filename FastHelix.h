@@ -1,9 +1,10 @@
-#pragma once
+#ifndef __FAST_HELIX__
+#define __FAST_HELIX__
 
 #include "GlobalPoint.h"
 #include "FastCircle.h"
 #include "FastLine.h"
-
+#include <iostream>
 /*
    Generation of track parameters at a vertex using two hits and a vertex.
    It is used e.g. by a seed generator.
@@ -38,14 +39,14 @@ public:
         return theCircle.isValid();
     }
 
-    GlobalTrajectoryParameters stateAtVertex() const
-    {
-        return atVertex;
-    }
-
     const FastCircle & circle() const
     {
         return theCircle;
+    }
+
+    const GlobalPoint & getPt() const
+    {
+        return pt_;
     }
 
 private:
@@ -63,16 +64,14 @@ private:
         return theCircle.vertexPoint();
     }
 
-    GlobalPoint calculateMomentum(const GlobalPoint &direction, const float transverseCurvature,
-                                  const float MagneticFieldZ);
     void compute();
     void helixStateAtVertex();
     void straightLineStateAtVertex();
 
     static constexpr float maxPt = 10000; // 10Tev
 
-    GlobalPoint pt;
-    
+    GlobalPoint pt_;
+
     GlobalPoint basisVertex;
     FastCircle theCircle;
     float tesla0;
@@ -98,8 +97,20 @@ void FastHelix::helixStateAtVertex()
     //rho =
     //100. * pt *
     //(10./(3.*MagneticField::inTesla(GlobalPoint(0., 0., 0.)).z()));
-
     // pt = 0.01 * rho * (0.3*MagneticField::inTesla(GlobalPoint(0.,0.,0.)).z());
+    
+    /*
+    // this is the same as the circle fitter used on gpu
+    const float BZ = 3.8112;
+    // e = 1.602177×10^-19 C (coulombs)
+    const float Q = 1.602177E-19;
+    // c = 2.998×10^8 m/s (meters per second)
+    //const float C = 2.998E8;
+    // 1 GeV/c = 5.344286×10^-19 J s/m (joule seconds per meter)
+    const float GEV_C = 5.344286E-19;
+    std::cout << "PT CIRCLE " << Q * BZ * (rho * 1E-2) / GEV_C << std::endl;
+    */
+
     double cm2GeV = 0.01 * 0.3 * tesla0;
     double pt = cm2GeV * rho;
 
@@ -111,7 +122,7 @@ void FastHelix::helixStateAtVertex()
         straightLineStateAtVertex();
         return;
     }
-
+    
     // tangent in v (or the opposite...)
     double px = -cm2GeV * (vertex().y() - theCircle.y0());
     double py =  cm2GeV * (vertex().x() - theCircle.x0());
@@ -127,14 +138,13 @@ void FastHelix::helixStateAtVertex()
     //in transverse plane
     //pz = pT*(dz/d(R*phi)))
 
-    double dzdrphi = outerHit().z() - middleHit().z();
-    dzdrphi /= rho * acos(dcphi);
+    double dzdrphi = (outerHit().z() - middleHit().z()) / (rho * acos(dcphi));
     double pz = pt * dzdrphi;
 
-    pt[0] = px;
-    pt[1] = py;
-    pt[2] = pz;
-    
+    pt_[0] = px;
+    pt_[1] = py;
+    pt_[2] = pz;
+
     /*
     TrackCharge q = 1;
     if (theCircle.x0()*py - theCircle.y0()*px < 0) {
@@ -190,17 +200,25 @@ void FastHelix::straightLineStateAtVertex()
     FastLine flfit(outerHit(), middleHit());
     double dzdr = -flfit.n1() / flfit.n2();
     double pz = pt * dzdr;
-    
-    pt[0] = px;
-    pt[1] = py;
-    pt[2] = pz;
-    
+
+    pt_[0] = px;
+    pt_[1] = py;
+    pt_[2] = pz;
+
+    const float BZ = 3.8112;
+    // e = 1.602177×10^-19 C (coulombs)
+    const float Q = 1.602177E-19;
+    // c = 2.998×10^8 m/s (meters per second)
+    //const float C = 2.998E8;
+    // 1 GeV/c = 5.344286×10^-19 J s/m (joule seconds per meter)
+    const float GEV_C = 5.344286E-19;
+    //std::cout << "PT CIRCLE " << Q * BZ * (rho * 1E-2) / GEV_C << std::endl;
     /*
     TrackCharge q = 1;
-    
+
     double z_0 = -flfit.c() / flfit.n2();
-    atVertex = GlobalTrajectoryParameters(GlobalPoint(vertex().x(), vertex().y(), z_0),
-                                          GlobalPoint(px, py, pz), q);
+    atVertex = GlobalTrajectoryParameters(GlobalPoint(vertex().x(), vertex().y(), z_0), GlobalPoint(px, py, pz), q);
     */
 }
 
+#endif
