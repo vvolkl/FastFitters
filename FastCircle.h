@@ -6,32 +6,32 @@
 
 #include "GlobalPoint.h"
 
-/*
-   Calculate circle parameters (x0, y0, rho) for a circle:
-   (x-x0)^2 + (y-y0)^2 = rho^2 
-   in Global Cartesian Coordinates in the (x,y) plane for a given set of 
-   GlobalPoints. It is done by mapping the points onto the Riemann Sphere 
-   and fit a plane to the transformed coordinates of the points. 
-   The method is described in:
-
-   A.Strandlie, J.Wroldsen, R.Fruehwirth, B.Lillekjendlie:
-   Particle tracks fitted on the Riemann sphere
-   Computer Physics Communications 131 (2000) 95-108, 18 January 2000
-   
-   Implementation: Matthias Winkler, 14 February 2001
-
-   This implementation is a specialized version of the general Circle class
-   for three points.
-
-   Update 14.02.2001:
-        For 3 Points (2 RecHits + Vertex) the plain parameters
-    n1*x + n2*y + n3*z + c = 0
-    are analytically calculable.
-   
-   Update 14.02.2001:
-        In the case that a circle fit is not possible (points 
-   are along a straight line) the parameters of the
-   straight line can be used: c + n1*x + n2*y = 0 
+/**
+ *  Calculate circle parameters (x0, y0, rho) for a circle:
+ *  (x-x0)^2 + (y-y0)^2 = rho^2 
+ *  in Global Cartesian Coordinates in the (x,y) plane for a given set of 
+ *  GlobalPoints. It is done by mapping the points onto the Riemann Sphere 
+ *  and fit a plane to the transformed coordinates of the points. 
+ *  The method is described in:
+ *
+ *  A.Strandlie, J.Wroldsen, R.Fruehwirth, B.Lillekjendlie:
+ *  Particle tracks fitted on the Riemann sphere
+ *  Computer Physics Communications 131 (2000) 95-108, 18 January 2000
+ *  
+ *  Implementation: Matthias Winkler, 14 February 2001
+ *
+ *  This implementation is a specialized version of the general Circle class
+ *  for three points.
+ *
+ *  Update 14.02.2001:
+ *       For 3 Points (2 RecHits + Vertex) the plain parameters
+ *   n1*x + n2*y + n3*z + c = 0
+ *   are analytically calculable.
+ *  
+ *  Update 14.02.2001:
+ *       In the case that a circle fit is not possible (points 
+ *  are along a straight line) the parameters of the
+ *  straight line can be used: c + n1*x + n2*y = 0 
 */
 
 std::tuple<double, double, double, double, double, double, bool>
@@ -52,11 +52,6 @@ fastRiemannCircleFit(GlobalPoint outer, GlobalPoint inner, GlobalPoint vertex, f
     R2 = perp2(p);
     fact = 1.f / (1.f + R2);
     GlobalPoint x(fact * p.x(), fact * p.y(), fact * R2);
-    /*
-    x[0] = fact * p.x();
-    x[1] = fact * p.y();
-    x[2] = fact * R2;
-*/
 
     p[0] = inner.x() / norm;
     p[1] = inner.y() / norm;
@@ -66,11 +61,6 @@ fastRiemannCircleFit(GlobalPoint outer, GlobalPoint inner, GlobalPoint vertex, f
     R2 = perp2(p);
     fact = 1.f / (1.f + R2);
     GlobalPoint y(fact * p.x(), fact * p.y(), fact * R2);
-    /*
-    y[0] = fact * p.x();
-    y[1] = fact * p.y();
-    y[2] = fact * R2;
-    */
     
     p[0] = vertex.x() / norm;
     p[1] = vertex.y() / norm;
@@ -79,16 +69,7 @@ fastRiemannCircleFit(GlobalPoint outer, GlobalPoint inner, GlobalPoint vertex, f
     R2 = perp2(p);
     fact = 1.f / (1.f + R2);
     GlobalPoint z(fact * p.x(), fact * p.y(), fact * R2);
-    /*
-    z[0] = fact * p.x();
-    z[1] = fact * p.y();
-    z[2] = fact * R2;
-    */
-    
-    //GlobalPoint n;
-    //n[0] =   x[1] * (y[2] - z[2]) + y[1] * (z[2] - x[2]) + z[1] * (x[2] - y[2]);
-    //n[1] = -(x[0] * (y[2] - z[2]) + y[0] * (z[2] - x[2]) + z[0] * (x[2] - y[2]));
-    //n[2] =   x[0] * (y[1] - z[1]) + y[0] * (z[1] - x[1]) + z[0] * (x[1] - y[1]);
+
     GlobalPoint n(x[1] * (y[2] - z[2]) + y[1] * (z[2] - x[2]) + z[1] * (x[2] - y[2]),
         -(x[0] * (y[2] - z[2]) + y[0] * (z[2] - x[2]) + z[0] * (x[2] - y[2])),
         x[0] * (y[1] - z[1]) + y[0] * (z[1] - x[1]) + z[0] * (x[1] - y[1]));
